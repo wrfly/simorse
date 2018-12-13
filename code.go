@@ -1,11 +1,10 @@
 package morse
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 )
-
-// USR1 = 0
-// USR2 = 1
 
 type Code string
 
@@ -120,21 +119,54 @@ func MorseCode(input string) Codes {
 
 type SigCode uint8
 
+func (c SigCode) String() string {
+	return string(rMorseSigMap[c])
+}
+
 type SigCodes []SigCode
 
-func (c SigCodes) String() string {
-	s := make([]rune, 0, 100)
+func (c SigCodes) String() (x string) {
 	for _, code := range c {
-		if code != sigShort {
-			s = append(s, rMorseSigMap[code])
+		x = fmt.Sprintf("%s%s", x, code)
+	}
+	return
+}
+
+func (c SigCodes) Signal() Signals {
+	list := []Signal{}
+	for _, r := range c {
+		// 2^6=64 > 26*2+10
+		for _, b := range fmt.Sprintf("%0.6b", r) {
+			list = append(list, b == '1')
 		}
 	}
-	return string(s)
+	return list
+}
+
+type Signal bool
+
+func (s Signal) String() string {
+	if s {
+		return "1"
+	}
+	return "0"
+}
+
+type Signals []Signal
+
+func (s Signals) String() (x string) {
+	for _, xx := range s {
+		x = fmt.Sprintf("%s%s", x, xx)
+	}
+	return
 }
 
 // signal code
 const (
-	sigA SigCode = iota
+	sigSpace SigCode = iota
+
+	// upper case
+	sigA
 	sigB
 	sigC
 	sigD
@@ -161,8 +193,33 @@ const (
 	sigY
 	sigZ
 
-	sigShort
-	sigSpace
+	// lower case
+	sigA_
+	sigB_
+	sigC_
+	sigD_
+	sigE_
+	sigF_
+	sigG_
+	sigH_
+	sigI_
+	sigJ_
+	sigK_
+	sigL_
+	sigM_
+	sigN_
+	sigO_
+	sigP_
+	sigQ_
+	sigR_
+	sigS_
+	sigT_
+	sigU_
+	sigV_
+	sigW_
+	sigX_
+	sigY_
+	sigZ_
 
 	sigNum0
 	sigNum1
@@ -185,6 +242,14 @@ var morseSigMap = map[rune]SigCode{
 	'U': sigU, 'V': sigV, 'W': sigW, 'X': sigX,
 	'Y': sigY, 'Z': sigZ,
 
+	'a': sigA_, 'b': sigB_, 'c': sigC_, 'd': sigD_,
+	'e': sigE_, 'f': sigF_, 'g': sigG_, 'h': sigH_,
+	'i': sigI_, 'j': sigJ_, 'k': sigK_, 'l': sigL_,
+	'm': sigM_, 'n': sigN_, 'o': sigO_, 'p': sigP_,
+	'q': sigQ_, 'r': sigR_, 's': sigS_, 't': sigT_,
+	'u': sigU_, 'v': sigV_, 'w': sigW_, 'x': sigX_,
+	'y': sigY_, 'z': sigZ_,
+
 	'0': sigNum0, '1': sigNum1, '2': sigNum2,
 	'3': sigNum3, '4': sigNum4, '5': sigNum5,
 	'6': sigNum6, '7': sigNum7,
@@ -202,6 +267,14 @@ var rMorseSigMap = map[SigCode]rune{
 	sigU: 'U', sigV: 'V', sigW: 'W', sigX: 'X',
 	sigY: 'Y', sigZ: 'Z',
 
+	sigA_: 'a', sigB_: 'b', sigC_: 'c', sigD_: 'd',
+	sigE_: 'e', sigF_: 'f', sigG_: 'g', sigH_: 'h',
+	sigI_: 'i', sigJ_: 'j', sigK_: 'k', sigL_: 'l',
+	sigM_: 'm', sigN_: 'n', sigO_: 'o', sigP_: 'p',
+	sigQ_: 'q', sigR_: 'r', sigS_: 's', sigT_: 't',
+	sigU_: 'u', sigV_: 'v', sigW_: 'w', sigX_: 'x',
+	sigY_: 'y', sigZ_: 'z',
+
 	sigNum0: '0', sigNum1: '1', sigNum2: '2',
 	sigNum3: '3', sigNum4: '4', sigNum5: '5',
 	sigNum6: '6', sigNum7: '7',
@@ -210,18 +283,30 @@ var rMorseSigMap = map[SigCode]rune{
 	sigSpace: ' ',
 }
 
+// SigMorseCode convert string to sigCodes
 func SigMorseCode(input string) SigCodes {
 	codes := make([]SigCode, 0, len(input)*2)
 
-	for _, s := range strings.ToUpper(input) {
-		if s == ' ' && len(codes) > 0 {
-			codes = codes[:len(codes)-1]
-		}
+	for _, s := range input {
 		codes = append(codes, morseSigMap[s])
-		if s != ' ' {
-			codes = append(codes, sigShort)
-		}
 	}
 
 	return codes
+}
+
+// ParseSigMorseCode convert 010101 to string
+func ParseSigMorseCode(input string) (SigCodes, error) {
+	if len(input)%6 != 0 {
+		return nil, fmt.Errorf("bad input signal")
+	}
+	sigCodes := SigCodes{}
+	for i := 0; i < len(input); i += 6 {
+		binaryStr := fmt.Sprintf("%s", input[i:i+6])
+		u, err := strconv.ParseUint(binaryStr, 2, 8)
+		if err != nil {
+			return nil, err
+		}
+		sigCodes = append(sigCodes, SigCode(u))
+	}
+	return sigCodes, nil
 }
