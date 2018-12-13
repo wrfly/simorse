@@ -2,8 +2,10 @@ package morse
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 type Code string
@@ -150,6 +152,21 @@ func (s Signal) String() string {
 		return "1"
 	}
 	return "0"
+}
+
+func (s Signal) Signal() syscall.Signal {
+	if s {
+		return syscall.SIGUSR1
+	}
+	return syscall.SIGUSR2
+}
+
+// ParseSignal can convert os.Signal to morse.Signal
+func ParseSignal(s os.Signal) Signal {
+	if s == syscall.SIGUSR1 {
+		return true
+	}
+	return false
 }
 
 type Signals []Signal
