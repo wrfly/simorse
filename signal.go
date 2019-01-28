@@ -22,7 +22,7 @@ func SendSignal(pid int, cmd string) error {
 			return err
 		}
 		// give time to let the process handle the signal
-		time.Sleep(time.Millisecond)
+		time.Sleep(time.Millisecond * 5)
 	}
 
 	return nil
@@ -36,7 +36,7 @@ func ReceiveSignal(ctx context.Context) chan string {
 	go func() {
 		for ctx.Err() == nil {
 			received := Signals{}
-			tk := time.NewTicker(time.Second)
+			tk := time.NewTicker(time.Second * 2)
 			for done := false; !done; {
 				select {
 				case <-tk.C:

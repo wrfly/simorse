@@ -8,7 +8,7 @@ import (
 )
 
 func TestSignal(t *testing.T) {
-	cmd := "hello world 0 1 2 3 4 5"
+	cmd := "abcdefghijklnmopqrstuvwxyz 1234 5sadfasds"
 
 	cmdChan := ReceiveSignal(context.Background())
 	go func() {
