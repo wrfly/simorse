@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	morse "github.com/wrfly/simorse"
+	"github.com/wrfly/simorse/morse"
 )
 
 func main() {
