@@ -19,8 +19,12 @@ func TestSignal(t *testing.T) {
 		}
 	}()
 
-	if err := SendSignal(os.Getpid(), cmd); err != nil {
+	x, err := SendSignal(os.Getpid(), cmd)
+	if err != nil {
 		t.Errorf("%s", err)
+	}
+	if x != cmd {
+		t.Errorf("???")
 	}
 	time.Sleep(time.Second)
 }
