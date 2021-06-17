@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -20,16 +21,20 @@ func main() {
 		log.Fatalf("convert pid error: %s", err)
 	}
 
-	cmd := ""
-	for {
-		fmt.Print("->")
-		fmt.Scanln(&cmd)
-		log.Printf("[%s]", cmd)
-		if cmd != "" {
-			morse.SendSignal(targetPID, cmd)
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Print("->")
+	for scanner.Scan() {
+		cmd := scanner.Text()
+		sent, err := morse.SendSignal(targetPID, cmd)
+		if err != nil {
+			log.Printf("send signal error: %s", err)
+			continue
 		}
+		log.Printf("[%s]", sent)
 		if cmd == "q" {
 			break
 		}
+		fmt.Print("->")
 	}
 }

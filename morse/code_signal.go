@@ -72,15 +72,17 @@ func (s Signals) String() (x string) {
 
 // signal code
 const signalCodes = "qwertyuiopasdfghjklzxcvbnm" +
-	"QWERTYUIOPASDFGHJKLZXCVBNM1234567890 "
+	"QWERTYUIOPASDFGHJKLZXCVBNM1234567890 _"
 
 // SigMorseCode convert string to SigCodes
 func SigMorseCode(input string) SigCodes {
-	codes := make([]SigCode, 0, len(input))
+	codes := make(SigCodes, 0, len(input))
 
 	for _, r := range input {
 		index := strings.IndexRune(signalCodes, r)
-		codes = append(codes, SigCode(index))
+		if index != -1 {
+			codes = append(codes, SigCode(index))
+		}
 	}
 
 	return codes
